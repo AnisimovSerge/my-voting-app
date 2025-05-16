@@ -1,0 +1,12 @@
+﻿# Файлы окружения
+.env*
+*.local
+firebaseConfig.*
+
+# Зависимости
+node_modules/
+
+# Системные файлы
+.DS_Store
+.idea/
+.vscode/

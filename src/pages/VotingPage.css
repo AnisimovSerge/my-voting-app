@@ -1,0 +1,230 @@
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: transparent;
+  overflow: auto;
+}
+
+.voting-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(120deg, #f7b42c 0%, #03a9f4 100%);
+  padding-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.vote-header {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 2rem 0 2rem;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.vote-header-logo {
+  height: 48px;
+  width: 48px;
+  object-fit: contain;
+}
+
+.vote-header-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #1976d2;
+  margin: 0 auto;
+  text-align: center;
+  flex: 1;
+}
+
+.vote-header-timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1976d2;
+  margin-left: auto;
+}
+
+.voting-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 2rem 0 1.5rem 0;
+  text-align: center;
+  color: #222;
+  width: 100%;
+}
+
+.voting-loading,
+.voting-success {
+  font-size: 1.5rem;
+  color: #1976d2;
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.voting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-items: center;
+  box-sizing: border-box;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.voting-card.voting-card-photo {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 4px 24px rgba(25,118,210,0.10), 0 2px 12px #0002;
+  min-height: 340px;
+  display: flex;
+  align-items: stretch;
+  background: #222;
+  width: 100%;
+  max-width: 340px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
+  border: 2px solid transparent;
+}
+
+.voting-card.selected {
+  border: 2.5px solid #1976d2;
+  box-shadow: 0 8px 32px rgba(25,118,210,0.18), 0 2px 12px #03a9f4cc;
+  transform: scale(1.04);
+}
+
+.voting-card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 340px;
+  display: flex;
+  align-items: stretch;
+}
+
+.voting-card-img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  display: block;
+  border-radius: 22px;
+  background: #eee;
+}
+
+.voting-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,rgba(0,0,0,0.18) 40%,rgba(0,0,0,0.75) 100%);
+  border-radius: 22px;
+  z-index: 1;
+}
+
+.voting-card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  color: #fff;
+  padding: 22px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  background: none;
+}
+
+.voting-number {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 8px #000, 0 0 8px #1976d2;
+  margin-bottom: 0.2em;
+}
+
+.voting-name {
+  font-size: 1.13rem;
+  font-weight: 600;
+  text-shadow: 0 2px 8px #000a;
+  margin-bottom: 0.2em;
+}
+
+.voting-btn {
+  margin-top: 8px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 10px 32px;
+  background: linear-gradient(90deg, #ff6a00 0%, #03a9f4 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(3,169,244,0.13);
+  transition: background 0.2s, transform 0.2s;
+  text-shadow: 0 1px 4px #0006;
+  letter-spacing: 0.04em;
+}
+
+.voting-btn:disabled {
+  background: #bdbdbd;
+  color: #fff;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.voting-input {
+  border: 1px solid #03a9f4;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  outline: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+  .vote-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0 0 0;
+    align-items: flex-start;
+  }
+  .voting-title {
+    font-size: 1.2rem;
+    margin: 1.2rem 0 1rem 0;
+  }
+  .voting-grid {
+    gap: 1.2rem;
+    padding: 0 0.5rem;
+  }
+  .voting-card.voting-card-photo {
+    min-height: 180px;
+    max-width: 98vw;
+    border-radius: 14px;
+  }
+  .voting-card-img {
+    height: 180px;
+    border-radius: 14px;
+  }
+  .voting-card-overlay {
+    border-radius: 14px;
+  }
+  .voting-card-info {
+    padding: 12px 10px 10px 10px;
+    gap: 6px;
+  }
+  .voting-number {
+    font-size: 1.1rem;
+  }
+}

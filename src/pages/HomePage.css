@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap');
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.homepage-root {
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(120deg, #f7b42c 0%, #03a9f4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-bg-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  opacity: 0.13;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.homepage-content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  background: rgba(255,255,255,0.55); /* ещё более прозрачный */
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 1.1rem 1.2rem 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+  max-width: 95vw;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .homepage-content {
+    max-width: 340px;
+  }
+}
+@media (min-width: 900px) {
+  .homepage-content {
+    max-width: 420px;
+  }
+}
+
+.homepage-content h1 {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #1976d2;
+  margin-bottom: 0.7rem;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.homepage-content p {
+  font-size: 0.98rem;
+  color: #222;
+  margin-bottom: 1.1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.homepage-content button {
+  background: linear-gradient(90deg, #ff6a00 0%, #03a9f4 100%);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 2.2rem;
+  box-shadow: 0 2px 8px rgba(3,169,244,0.13);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.homepage-content button:hover {
+  background: linear-gradient(90deg, #ff8c1a 0%, #0288d1 100%);
+  transform: translateY(-2px) scale(1.04);
+}
