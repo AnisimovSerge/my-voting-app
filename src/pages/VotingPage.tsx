@@ -1,4 +1,5 @@
-﻿import React, { useEffect, useState } from "react";
+﻿
+//redeploy test
 import { db } from "../utils/firebaseConfig";
 import { collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useFingerprint } from "../utils/useFingerprint";
