@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import AdminUploadWorks from "../components/AdminUploadWorks";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../utils/firebaseConfig";
+import { db } from "../utils/firebaseConfig-temp";
 import "./VotingPage.css";
 
 const VoteHeader: React.FC<{ timer?: React.ReactNode }> = ({ timer }) => (

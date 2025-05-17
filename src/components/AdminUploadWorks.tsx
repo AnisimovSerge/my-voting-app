@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { db } from "../utils/firebaseConfig";
+import { db } from "../utils/firebaseConfig-temp";
 import { collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
 
 interface Participant {
