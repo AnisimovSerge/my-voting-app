@@ -1,19 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
-const Timer: React.FC<{ initialSeconds: number }> = ({ initialSeconds }) => {
+type TimerProps = {
+  initialSeconds: number;
+  onComplete?: () => void;
+};
+
+const Timer: React.FC<TimerProps> = ({ initialSeconds, onComplete }) => {
   const [seconds, setSeconds] = useState(initialSeconds);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     setSeconds(initialSeconds);
+    completedRef.current = false;
   }, [initialSeconds]);
 
   useEffect(() => {
-    if (seconds <= 0) return;
+    if (seconds <= 0) {
+      if (!completedRef.current && onComplete) {
+        completedRef.current = true;
+        onComplete();
+      }
+      return;
+    }
     const interval = setInterval(() => {
       setSeconds(s => (s > 0 ? s - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [seconds]);
+  }, [seconds, onComplete]);
 
   const min = Math.floor(seconds / 60)
     .toString()

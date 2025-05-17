@@ -1,96 +1,138 @@
-﻿import React, { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
+﻿import React, { useEffect, useState } from "react";
 import { db } from "../utils/firebaseConfig";
+import { collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+
+interface Participant {
+  id: string;
+  authors: string[];
+  number: number;
+  photoUrl?: string;
+}
 
 const AdminUploadWorks: React.FC = () => {
-  const [name, setName] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [number, setNumber] = useState<number | "">("");
-  const [loading, setLoading] = useState(false);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [newAuthors, setNewAuthors] = useState(["", "", ""]);
+  const [newNumber, setNewNumber] = useState("");
+  const [photoLinks, setPhotoLinks] = useState<{ [id: string]: string }>({});
 
-  const handleUpload = async () => {
-    if (!photoUrl || !name || !number) return;
-    setLoading(true);
-    try {
-      await addDoc(collection(db, "participants"), {
-        name,
-        photoUrl,
-        number: Number(number),
-        votes: 0,
-      });
-      setPhotoUrl("");
-      setName("");
-      setNumber("");
-      alert("Работа успешно добавлена!");
-    } catch (error) {
-      alert("Ошибка: " + (error as Error).message);
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      const snap = await getDocs(collection(db, "participants"));
+      const arr = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Participant));
+      arr.sort((a, b) => a.number - b.number);
+      setParticipants(arr);
+      const links: { [id: string]: string } = {};
+      arr.forEach(p => { links[p.id] = p.photoUrl || ""; });
+      setPhotoLinks(links);
+    };
+    fetchParticipants();
+  }, []);
+
+  const handleAddParticipant = async () => {
+    const authors = newAuthors.map(a => a.trim()).filter(Boolean);
+    if (authors.length === 0 || !newNumber.trim()) return;
+    const number = parseInt(newNumber, 10);
+    if (isNaN(number)) {
+      alert("Номер должен быть числом");
+      return;
     }
-    setLoading(false);
+    await addDoc(collection(db, "participants"), {
+      authors,
+      number,
+      votes: 0,
+    });
+    setNewAuthors(["", "", ""]);
+    setNewNumber("");
+    // обновить список
+    const snap = await getDocs(collection(db, "participants"));
+    const arr = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Participant));
+    arr.sort((a, b) => a.number - b.number);
+    setParticipants(arr);
+    const links: { [id: string]: string } = {};
+    arr.forEach(p => { links[p.id] = p.photoUrl || ""; });
+    setPhotoLinks(links);
+  };
+
+  const handlePhotoUrlChange = (id: string, value: string) => {
+    setPhotoLinks(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSavePhotoUrl = async (id: string) => {
+    const url = photoLinks[id]?.trim();
+    if (!url) {
+      alert("Введите ссылку на фото");
+      return;
+    }
+    await updateDoc(doc(db, "participants", id), { photoUrl: url });
+    alert("Ссылка сохранена!");
+    // обновить список
+    const snap = await getDocs(collection(db, "participants"));
+    const arr = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Participant));
+    arr.sort((a, b) => a.number - b.number);
+    setParticipants(arr);
   };
 
   return (
-    <div style={{ marginTop: 32, padding: 24, background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px #0001", maxWidth: 400 }}>
-      <h2 style={{ marginBottom: 16 }}>Добавить работу</h2>
-      <input
-        type="number"
-        placeholder="Номер стенда"
-        value={number}
-        min={1}
-        max={99}
-        onChange={e => setNumber(e.target.value ? Number(e.target.value) : "")}
-        className="voting-input"
-        style={{
-          border: "1px solid #03a9f4",
-          borderRadius: 8,
-          padding: "12px 16px",
-          fontSize: 16,
-          marginBottom: 16,
-          width: "100%",
-          outline: "none",
-        }}
-      />
-      <input
-        type="text"
-        placeholder="Имя участника"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        className="voting-input"
-        style={{
-          border: "1px solid #03a9f4",
-          borderRadius: 8,
-          padding: "12px 16px",
-          fontSize: 16,
-          marginBottom: 16,
-          width: "100%",
-          outline: "none",
-        }}
-      />
-      <input
-        type="text"
-        placeholder="Ссылка на изображение (URL)"
-        value={photoUrl}
-        onChange={e => setPhotoUrl(e.target.value)}
-        className="voting-input"
-        style={{
-          border: "1px solid #03a9f4",
-          borderRadius: 8,
-          padding: "12px 16px",
-          fontSize: 16,
-          marginBottom: 16,
-          width: "100%",
-          outline: "none",
-        }}
-      />
-      <button
-        className="voting-btn"
-        style={{ width: "100%" }}
-        onClick={handleUpload}
-        disabled={loading || !photoUrl || !name || !number}
-      >
-        {loading ? "Добавление..." : "Добавить"}
-      </button>
-      <div style={{marginTop: 12, fontSize: 13, color: "#666"}}>
-        <div>Загрузите фото на imgur.com, postimages.org, Google Диск или Яндекс Диск и вставьте прямую ссылку на изображение.</div>
+    <div>
+      <h2>Добавить работу</h2>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 24 }}>
+        {[0, 1, 2].map(i => (
+          <input
+            key={i}
+            type="text"
+            placeholder={`Автор ${i + 1}`}
+            value={newAuthors[i]}
+            onChange={e => {
+              const arr = [...newAuthors];
+              arr[i] = e.target.value;
+              setNewAuthors(arr);
+            }}
+            className="voting-input"
+            style={{ width: 140 }}
+          />
+        ))}
+        <input
+          type="number"
+          placeholder="Номер работы"
+          value={newNumber}
+          onChange={e => setNewNumber(e.target.value)}
+          className="voting-input"
+          style={{ width: 120 }}
+        />
+        <button className="voting-btn" onClick={handleAddParticipant}>
+          Добавить
+        </button>
+      </div>
+
+      <h2>Работы</h2>
+      <div>
+        {participants.map(p => (
+          <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+            <div style={{ width: 60, fontWeight: 700 }}>№{p.number}</div>
+            <div style={{ width: 260 }}>
+              {Array.isArray(p.authors) && p.authors.length > 0
+                ? p.authors.join(", ")
+                : <span style={{ color: "#aaa" }}>Нет авторов</span>}
+            </div>
+            <div>
+              {p.photoUrl ? (
+                <img src={p.photoUrl} alt={p.authors?.join(", ") || ""} style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8 }} />
+              ) : (
+                <span style={{ color: "#aaa" }}>Нет фото</span>
+              )}
+            </div>
+            <input
+              type="text"
+              placeholder="Вставьте прямую ссылку на фото"
+              value={photoLinks[p.id] || ""}
+              onChange={e => handlePhotoUrlChange(p.id, e.target.value)}
+              style={{ width: 260, marginLeft: 8 }}
+            />
+            <button className="voting-btn" style={{ marginLeft: 8 }} onClick={() => handleSavePhotoUrl(p.id)}>
+              Сохранить ссылку
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

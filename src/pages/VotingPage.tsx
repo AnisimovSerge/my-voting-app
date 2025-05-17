@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { db } from "../utils/firebaseConfig";
-import { collection, getDocs, addDoc, query, where, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useFingerprint } from "../utils/useFingerprint";
 import Timer from "../components/Timer";
 import "./VotingPage.css";
@@ -18,7 +18,8 @@ const VoteHeader: React.FC<{ timer?: React.ReactNode }> = ({ timer }) => (
 
 interface Participant {
   id: string;
-  name: string;
+  name?: string;
+  authors?: string[];
   photoUrl: string;
   number: number;
   votes: number;
@@ -73,6 +74,29 @@ const VotingPage: React.FC = () => {
     checkVote();
   }, [fingerprint]);
 
+  const handlePhaseChange = async (newStatus: VotingStatus, newPhase: "prevote" | "voting" | null, newRemaining: number) => {
+    setStatus(newStatus);
+    setPhase(newPhase);
+    setRemaining(newRemaining);
+    try {
+      await updateDoc(doc(db, "settings", "voting"), {
+        status: newStatus,
+        phase: newPhase,
+        remaining: newRemaining,
+      });
+    } catch (e) {
+      // Можно обработать ошибку, если нужно
+    }
+  };
+
+  const handlePrevoteComplete = () => {
+    handlePhaseChange("voting", "voting", VOTING_DURATION);
+  };
+
+  const handleVotingComplete = () => {
+    handlePhaseChange("ended", null, 0);
+  };
+
   const handleVote = async (participantId: string) => {
     if (!participantId || !fingerprint || alreadyVoted) return;
     try {
@@ -96,14 +120,22 @@ const VotingPage: React.FC = () => {
     timerContent = (
       <>
         <div className="timer-label">До начала голосования:</div>
-        <Timer initialSeconds={remaining} key={`prevote-${remaining}`} />
+        <Timer
+          initialSeconds={remaining}
+          key={`prevote-${remaining}`}
+          onComplete={handlePrevoteComplete}
+        />
       </>
     );
   } else if (status === "voting" && remaining > 0) {
     timerContent = (
       <>
         <div className="timer-label">До конца голосования:</div>
-        <Timer initialSeconds={remaining} key={`voting-${remaining}`} />
+        <Timer
+          initialSeconds={remaining}
+          key={`voting-${remaining}`}
+          onComplete={handleVotingComplete}
+        />
       </>
     );
   }
@@ -128,13 +160,38 @@ const VotingPage: React.FC = () => {
             style={votingDisabled ? { opacity: 0.6, pointerEvents: "none" } : {}}
           >
             <div className="voting-card-img-wrap">
-              <img src={participant.photoUrl} alt={participant.name} className="voting-card-img" />
+              <img
+                src={participant.photoUrl}
+                alt={
+                  participant.authors
+                    ? participant.authors.join(" ")
+                    : participant.name || ""
+                }
+                className="voting-card-img"
+              />
               <div className="voting-card-overlay" />
               <div className="voting-card-info">
                 <div className="voting-number">
                   №{participant.number}
                 </div>
-                <div className="voting-name">{participant.name}</div>
+
+                <div className="voting-name">
+                  {participant.authors
+                    ? (
+                        Array.isArray(participant.authors)
+                          ? participant.authors.flatMap((authorStr) =>
+                              // Разбиваем строку на ФИО по шаблону "Фамилия И.О."
+                              typeof authorStr === "string"
+                                ? authorStr.match(/[А-ЯЁA-Z][а-яёa-z]+\s[А-ЯЁA-Z]\.[А-ЯЁA-Z]\./g) || [authorStr]
+                                : []
+                            )
+                          : String(participant.authors).split(",")
+                      ).map((author, idx) =>
+                        author && author.trim() ? <div key={idx}>{author.trim()}</div> : null
+                      )
+                    : participant.name}
+                </div>
+
                 <button
                   className="voting-btn"
                   onClick={e => {
@@ -156,3 +213,4 @@ const VotingPage: React.FC = () => {
 };
 
 export default VotingPage;
+
